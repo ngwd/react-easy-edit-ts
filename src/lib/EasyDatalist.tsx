@@ -1,10 +1,26 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import './EasyEdit.css';
 
-const EasyDatalist = (props) => {
-  const { options, value, onChange, attributes, placeholder, cssClassPrefix, onFocus, onBlur } = props;
-
+interface EasyDatalistProps {
+  options?: any[]; 
+  value?: string|number;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  attributes?: Record<string, any>;
+  placeholder?: string;
+  cssClassPrefix?: string;
+  onFocus?: () => void;
+  onBlur?: () => void;
+};
+const EasyDatalist:React.FC<EasyDatalistProps> = ({
+  options,
+  value,
+  onChange,
+  attributes = {},
+  placeholder,
+  cssClassPrefix,
+  onFocus,
+  onBlur
+}) => {
   const datalistId = 'easy-datalist-id';
 
   let datalistOptions = options.map(dl => (
@@ -29,24 +45,6 @@ const EasyDatalist = (props) => {
       </datalist>
     </div>
   );
-};
-
-EasyDatalist.propTypes = {
-  options: PropTypes.arrayOf(PropTypes.object),
-  placeholder: PropTypes.string,
-  onChange: PropTypes.func,
-  value: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number
-  ]),
-  attributes: PropTypes.object,
-  cssClassPrefix: PropTypes.string,
-  onFocus: PropTypes.func,
-  onBlur: PropTypes.func
-};
-
-EasyDatalist.defaultProps = {
-  attributes: {}
 };
 
 export default EasyDatalist;

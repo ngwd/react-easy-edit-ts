@@ -2,7 +2,7 @@ import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import EasyDropdown from './EasyDropdown';
-import Globals from './globals';
+import EasyEditGlobals from './EasyEditGlobals';
 
 describe('EasyDropdown Component', () => {
   const defaultOptions = [
@@ -20,7 +20,7 @@ describe('EasyDropdown Component', () => {
       />
     );
 
-    expect(screen.getByText(Globals.DEFAULT_SELECT_PLACEHOLDER)).toBeInTheDocument();
+    expect(screen.getByText(EasyEditGlobals.DEFAULT_SELECT_PLACEHOLDER)).toBeInTheDocument();
   });
 
   it('renders with custom placeholder', () => {

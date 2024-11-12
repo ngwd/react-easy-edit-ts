@@ -2,7 +2,7 @@ import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import EasyInput from './EasyInput';
-import Globals from './globals';
+import EasyEditGlobals from './EasyEditGlobals';
 import EasyEdit, { Types } from "./EasyEdit";
 
 describe('EasyInput Component', () => {
@@ -16,7 +16,7 @@ describe('EasyInput Component', () => {
 
     expect(inputElement).toBeInTheDocument();
     expect(inputElement).toHaveAttribute('type', 'text');
-    expect(inputElement).toHaveAttribute('placeholder', Globals.DEFAULT_PLACEHOLDER);
+    expect(inputElement).toHaveAttribute('placeholder', EasyEditGlobals.DEFAULT_PLACEHOLDER);
     expect(inputElement).toHaveAttribute('autocomplete', 'off');
   });
 

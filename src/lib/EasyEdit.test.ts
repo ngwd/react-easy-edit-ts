@@ -2,7 +2,7 @@ import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import '@testing-library/jest-dom';
 import EasyEdit, { Types } from "./EasyEdit";
-import Globals from "./globals";
+import EasyEditGlobals from "./EasyEditGlobals";
 import PropTypes from 'prop-types';
 
 describe("EasyEdit Component", () => {
@@ -552,7 +552,7 @@ describe("EasyEdit Component", () => {
           onSave={mockOnSave}
         />
       );
-    }).toThrow(Globals.ERROR_UNSUPPORTED_TYPE);
+    }).toThrow(EasyEditGlobals.ERROR_UNSUPPORTED_TYPE);
   });
 
   test('renders EasyDropdown correctly for select input', () => {
@@ -719,7 +719,7 @@ describe("EasyEdit Component", () => {
           isEditing={true}
         />
       );
-    }).toThrow(Globals.ERROR_UNSUPPORTED_TYPE);
+    }).toThrow(EasyEditGlobals.ERROR_UNSUPPORTED_TYPE);
   });
 
   test('renders color input in view mode for color type', () => {
@@ -752,12 +752,12 @@ describe("EasyEdit Component", () => {
         value=""
         onSave={mockOnSave}
         options={options}
-        placeholder={Globals.DEFAULT_PLACEHOLDER}
+        placeholder={Globals: EasyEditGlobals.DEFAULT_PLACEHOLDER}
         isEditing={true}
       />
     );
 
-    const selectElement = screen.getByText(Globals.DEFAULT_SELECT_PLACEHOLDER);
+    const selectElement = screen.getByText(EasyEditGlobals.DEFAULT_SELECT_PLACEHOLDER);
     expect(selectElement).toBeInTheDocument();
   });
 

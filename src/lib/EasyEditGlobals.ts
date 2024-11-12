@@ -1,4 +1,4 @@
-const Globals = {
+const EasyEditGlobals = {
   DEFAULT_PLACEHOLDER: 'Click to edit',
   DEFAULT_SELECT_PLACEHOLDER: 'Select ...',
   DEFAULT_SAVE_BUTTON_LABEL: 'Save',
@@ -13,4 +13,4 @@ const Globals = {
   POSITION_BEFORE: 'before'
 };
 
-export default Object.freeze(Globals);
+export default Object.freeze(EasyEditGlobals);

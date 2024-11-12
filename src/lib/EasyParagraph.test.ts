@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import EasyParagraph from './EasyParagraph';
-import Globals from './globals';
+import EasyEditGlobals from './EasyEditGlobals';
 
 describe('EasyParagraph Component', () => {
   const mockOnChange = jest.fn();
@@ -34,7 +34,7 @@ describe('EasyParagraph Component', () => {
 
   it('uses the default placeholder if no placeholder is provided', () => {
     render(<EasyParagraph value="" onChange={mockOnChange} />);
-    const textarea = screen.getByPlaceholderText(Globals.DEFAULT_PLACEHOLDER);
+    const textarea = screen.getByPlaceholderText(EasyEditGlobals.DEFAULT_PLACEHOLDER);
     expect(textarea).toBeInTheDocument();
   });
 

@@ -1,17 +1,17 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import PropTypes from "prop-types";
+import * as React from 'react';
+import {ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import "./EasyEdit.css";
 
 // local modules
-import Globals from "./globals";
-import EasyDropdown from "./EasyDropdown.jsx";
-import EasyInput from "./EasyInput.jsx";
-import EasyParagraph from "./EasyParagraph.jsx";
-import EasyRadio from "./EasyRadio.jsx";
-import EasyCheckbox from "./EasyCheckbox.jsx";
-import EasyColor from "./EasyColor.jsx";
-import EasyDatalist from "./EasyDatalist.jsx";
-import EasyCustom from "./EasyCustom.jsx";
+import EasyEditGlobals from './EasyEditGlobals';
+import EasyDropdown from "./EasyDropdown";
+import EasyInput from "./EasyInput";
+import EasyParagraph from "./EasyParagraph";
+import EasyRadio from "./EasyRadio";
+import EasyCheckbox from "./EasyCheckbox";
+import EasyColor from "./EasyColor";
+import EasyDatalist from "./EasyDatalist";
+import EasyCustom from "./EasyCustom";
 
 export const Types = {
   CHECKBOX: "checkbox",
@@ -33,9 +33,8 @@ export const Types = {
   TIME: "time",
   URL: "url",
   WEEK: "week"
-};
-
-Object.freeze(Types);
+} as const;
+type InputType = typeof Types[keyof typeof Types];
 
 const useHover = () => {
   const [hover, setHover] = useState(false);
@@ -45,11 +44,23 @@ const useHover = () => {
 
   return [hover, handleHoverOn, handleHoverOff];
 };
-
-const useEditState = (initialValue, editMode, onSave, onCancel, onValidate) => {
+interface UseEditStateProps<T> {
+  initialValue: T;
+  editMode?: boolean;
+  onSave: (value: T)=>void;
+  onCancel: ()=>void;
+  onValidate: (value: T)=>boolean;
+}
+const useEditState = <T, >({
+  initialValue,
+  editMode = false,
+  onSave,
+  onCancel,
+  onValidate
+}: UseEditStateProps<T>) => {
   const [editing, setEditing] = useState(editMode || false);
-  const [value, setValue] = useState(initialValue);
-  const [tempValue, setTempValue] = useState(initialValue);
+  const [value, setValue] = useState<T>(initialValue);
+  const [tempValue, setTempValue] = useState<T>(initialValue);
   const [isValid, setIsValid] = useState(true);
   const [isHidden, setIsHidden] = useState(false);
 
@@ -74,7 +85,7 @@ const useEditState = (initialValue, editMode, onSave, onCancel, onValidate) => {
       setEditing(editMode);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editMode]);
+  }, [editMode, editing]);
 
   const handleCancel = () => {
     setEditing(false);
@@ -96,53 +107,93 @@ const useEditState = (initialValue, editMode, onSave, onCancel, onValidate) => {
   };
 };
 
-const isNullOrUndefinedOrEmpty = (value) => {
+const isNullOrUndefinedOrEmpty = (value: any) => {
   return value === null || value === undefined || value === "";
 };
 
-export default function EasyEdit(props) {
-  const {
-    type,
-    value,
-    options,
-    saveButtonLabel,
-    saveButtonStyle,
-    cancelButtonLabel,
-    cancelButtonStyle,
-    deleteButtonLabel,
-    deleteButtonStyle,
-    editButtonLabel,
-    editButtonStyle,
-    buttonsPosition,
-    placeholder,
-    onCancel,
-    onDelete,
-    onValidate,
-    onFocus,
-    onBlur,
-    onSave,
-    validationMessage,
-    editable,
-    inputAttributes,
-    viewAttributes,
-    instructions,
-    editComponent,
-    displayComponent,
-    disableAutoSubmit,
-    disableAutoCancel,
-    cssClassPrefix,
-    hideSaveButton,
-    hideCancelButton,
-    hideDeleteButton,
-    hideEditButton,
-    onHoverCssClass,
-    saveOnBlur,
-    cancelOnBlur,
-    isEditing,
-    showEditViewButtonsOnHover,
-    showViewButtonsOnHover
-  } = props;
+interface EasyEditProps {
+  type: InputType;
+  value: string | number | boolean;
+  options?: any[];
+  saveButtonLabel?: string;
+  saveButtonStyle?: string;
+  cancelButtonLabel?: string;
+  cancelButtonStyle?: string;
+  deleteButtonLabel?: string;
+  deleteButtonStyle?: string;
+  editButtonLabel?: string;
+  editButtonStyle?: string;
+  buttonsPosition?: string;
+  placeholder?: string;
+  onCancel: () => void;
+  onDelete?: () => void;
+  onValidate: (value: string | number | boolean) => boolean;
+  onFocus?: () => void;
+  onBlur?: () => void;
+  onSave: (value: string | number | boolean) => void;
+  validationMessage?: string;
+  editable?: boolean;
+  inputAttributes?: Record<string, any>;
+  viewAttributes?: Record<string, any>;
+  instructions?: ReactNode;
+  editComponent?: ReactNode;
+  displayComponent?: ReactNode;
+  disableAutoSubmit?: boolean,
+  disableAutoCancel?: boolean,
+  cssClassPrefix?: string;
+  hideSaveButton?: boolean;
+  hideCancelButton?: boolean;
+  hideDeleteButton?: boolean;
+  hideEditButton?: boolean,
+  onHoverCssClass?: string;
+  saveOnBlur?: boolean;
+  cancelOnBlur?: boolean;
+  isEditing?: boolean;
+  showEditViewButtonsOnHover?: boolean;
+  showViewButtonsOnHover?: boolean;
+};
 
+export const EasyEdit: React.FC<EasyEditProps> = ({
+  type,
+  value,
+  options = [],
+  saveButtonLabel = EasyEditGlobals.DEFAULT_SAVE_BUTTON_LABEL,
+  saveButtonStyle =  null,
+  cancelButtonLabel =  EasyEditGlobals.DEFAULT_CANCEL_BUTTON_LABEL,
+  cancelButtonStyle = null,
+  deleteButtonLabel = EasyEditGlobals.DEFAULT_DELETE_BUTTON_LABEL,
+  deleteButtonStyle =  null,
+  editButtonLabel =  EasyEditGlobals.DEFAULT_EDIT_BUTTON_LABEL,
+  editButtonStyle =  null,
+  buttonsPosition =  EasyEditGlobals.POSITION_AFTER,
+  placeholder = EasyEditGlobals.DEFAULT_PLACEHOLDER,
+  onCancel = () => {},
+  onDelete =  () => {},
+  onBlur =  () => {},
+  onValidate =  (value: string | number | boolean) => true,
+  validationMessage =  EasyEditGlobals.FAILED_VALIDATION_MESSAGE,
+  onFocus = () => {},
+  onSave =  () => {},
+  editable =  true,
+  inputAttributes = {},
+  viewAttributes = {},
+  instructions = {},
+  editComponent = {},
+  displayComponent = false,
+  disableAutoSubmit = false ,
+  disableAutoCancel = false,
+  cssClassPrefix = "",
+  hideSaveButton = false,
+  hideCancelButton = false,
+  hideDeleteButton = true,
+  hideEditButton = true,
+  onHoverCssClass = EasyEditGlobals.DEFAULT_ON_HOVER_CSS_CLASS,
+  saveOnBlur = false,
+  cancelOnBlur = false,
+  isEditing = false,
+  showEditViewButtonsOnHover = false,
+  showViewButtonsOnHover = false
+}) => {
   const [hover, handleHoverOn, handleHoverOff] = useHover();
   const {
     editing,
@@ -156,7 +207,6 @@ export default function EasyEdit(props) {
     handleCancel,
     setEditing
   } = useEditState(value, isEditing, onSave, onCancel, onValidate);
-
   const saveButton = useRef();
   const editButton = useRef();
   const cancelButton = useRef();
@@ -275,7 +325,7 @@ export default function EasyEdit(props) {
       case Types.TEXTAREA:
         return renderTextarea(inputValue);
       default:
-        throw new Error(Globals.ERROR_UNSUPPORTED_TYPE);
+        throw new Error(EasyEditGlobals.ERROR_UNSUPPORTED_TYPE);
     }
   };
 
@@ -297,8 +347,8 @@ export default function EasyEdit(props) {
     }
   };
 
-  const manageButtonStyle = (style) => {
-    return style === null ? cssClassPrefix + Globals.DEFAULT_BUTTON_CSS_CLASS
+  const manageButtonStyle = (style?:string) => {
+    return style === null ? cssClassPrefix + EasyEditGlobals.DEFAULT_BUTTON_CSS_CLASS
       : style;
   };
 
@@ -316,7 +366,7 @@ export default function EasyEdit(props) {
     }
   };
 
-  const setCssClasses = (existingClasses) => {
+  const setCssClasses = (existingClasses:string) => {
     if (viewAttributes["class"]) {
       existingClasses += " " + viewAttributes["class"];
     }
@@ -327,7 +377,7 @@ export default function EasyEdit(props) {
     if (!editable) {
       return cssClassPrefix + "easy-edit-not-allowed " + existingClasses;
     } else if (hover) {
-      return onHoverCssClass === Globals.DEFAULT_ON_HOVER_CSS_CLASS
+      return onHoverCssClass === EasyEditGlobals.DEFAULT_ON_HOVER_CSS_CLASS
         ? cssClassPrefix + "easy-edit-hover-on " + existingClasses
         : onHoverCssClass + " " + existingClasses;
     } else {
@@ -346,7 +396,10 @@ export default function EasyEdit(props) {
     );
   };
 
-  const generateEditButton = (cssClassPrefix, hideEditButton, editButtonLabel,
+  const generateEditButton = (
+    cssClassPrefix:string, 
+    hideEditButton:boolean, 
+    editButtonLabel,
     editButtonStyle) => {
     if (!showViewButtonsOnHover || (showViewButtonsOnHover && hover)) {
       return (
@@ -424,8 +477,8 @@ export default function EasyEdit(props) {
         onFocus={handleFocus}
         onBlur={handleBlur}
         options={options}
-        placeholder={placeholder === Globals.DEFAULT_PLACEHOLDER
-          ? Globals.DEFAULT_SELECT_PLACEHOLDER : placeholder}
+        placeholder={placeholder === EasyEditGlobals.DEFAULT_PLACEHOLDER
+          ? EasyEditGlobals.DEFAULT_SELECT_PLACEHOLDER : placeholder}
         attributes={inputAttributes}
         cssClassPrefix={cssClassPrefix}
       />
@@ -569,7 +622,7 @@ export default function EasyEdit(props) {
         );
       }
       default: {
-        throw new Error(Globals.ERROR_UNSUPPORTED_TYPE);
+        throw new Error(EasyEditGlobals.ERROR_UNSUPPORTED_TYPE);
       }
     }
   };
@@ -586,117 +639,14 @@ export default function EasyEdit(props) {
         onMouseLeave={handleHoverOff}
         onKeyDown={handleKeyDown}
       >
-        {buttonsPosition === Globals.POSITION_BEFORE && renderButtons()}
+        {buttonsPosition === EasyEditGlobals.POSITION_BEFORE && renderButtons()}
         {renderComponentView()}
-        {buttonsPosition === Globals.POSITION_AFTER && renderButtons()}
+        {buttonsPosition === EasyEditGlobals.POSITION_AFTER && renderButtons()}
         {renderInstructions()}
         {renderValidationMessage()}
       </div>
     );
   }
-
   return renderPlaceholder();
-}
-
-EasyEdit.propTypes = {
-  type: PropTypes.oneOf([
-    "checkbox",
-    "color",
-    "datalist",
-    "date",
-    "datetime-local",
-    "email",
-    "file",
-    "month",
-    "number",
-    "password",
-    "radio",
-    "range",
-    "select",
-    "tel",
-    "text",
-    "textarea",
-    "time",
-    "url",
-    "week"
-  ]).isRequired,
-  value: PropTypes.oneOfType(
-    [PropTypes.string, PropTypes.number, PropTypes.array, PropTypes.object]),
-  options: PropTypes.array,
-  saveButtonLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
-  saveButtonStyle: PropTypes.string,
-  cancelButtonLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
-  cancelButtonStyle: PropTypes.string,
-  deleteButtonLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
-  deleteButtonStyle: PropTypes.string,
-  editButtonLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
-  editButtonStyle: PropTypes.string,
-  buttonsPosition: PropTypes.oneOf(["after", "before"]),
-  placeholder: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
-  onCancel: PropTypes.func,
-  onDelete: PropTypes.func,
-  onValidate: PropTypes.func,
-  onFocus: PropTypes.func,
-  onBlur: PropTypes.func,
-  onSave: PropTypes.func.isRequired,
-  validationMessage: PropTypes.string,
-  editable: PropTypes.bool,
-  inputAttributes: PropTypes.object,
-  viewAttributes: PropTypes.object,
-  instructions: PropTypes.string,
-  editComponent: PropTypes.element,
-  displayComponent: PropTypes.element,
-  disableAutoSubmit: PropTypes.bool,
-  disableAutoCancel: PropTypes.bool,
-  cssClassPrefix: PropTypes.string,
-  hideSaveButton: PropTypes.bool,
-  hideCancelButton: PropTypes.bool,
-  hideDeleteButton: PropTypes.bool,
-  hideEditButton: PropTypes.bool,
-  onHoverCssClass: PropTypes.string,
-  saveOnBlur: PropTypes.bool,
-  cancelOnBlur: PropTypes.bool,
-  isEditing: PropTypes.bool,
-  showEditViewButtonsOnHover: PropTypes.bool,
-  showViewButtonsOnHover: PropTypes.bool
 };
-
-EasyEdit.defaultProps = {
-  value: null,
-  saveButtonLabel: Globals.DEFAULT_SAVE_BUTTON_LABEL,
-  saveButtonStyle: null,
-  cancelButtonLabel: Globals.DEFAULT_CANCEL_BUTTON_LABEL,
-  cancelButtonStyle: null,
-  deleteButtonLabel: Globals.DEFAULT_DELETE_BUTTON_LABEL,
-  deleteButtonStyle: null,
-  editButtonLabel: Globals.DEFAULT_EDIT_BUTTON_LABEL,
-  editButtonStyle: null,
-  buttonsPosition: Globals.POSITION_AFTER,
-  placeholder: Globals.DEFAULT_PLACEHOLDER,
-  editable: true,
-  onCancel: () => {
-  },
-  onDelete: () => {
-  },
-  onBlur: () => {
-  },
-  onValidate: (value) => true,
-  validationMessage: Globals.FAILED_VALIDATION_MESSAGE,
-  inputAttributes: {},
-  viewAttributes: {},
-  instructions: null,
-  editComponent: null,
-  disableAutoSubmit: false,
-  disableAutoCancel: false,
-  cssClassPrefix: "",
-  hideSaveButton: false,
-  hideCancelButton: false,
-  hideDeleteButton: true,
-  hideEditButton: true,
-  onHoverCssClass: Globals.DEFAULT_ON_HOVER_CSS_CLASS,
-  saveOnBlur: false,
-  cancelOnBlur: false,
-  isEditing: false,
-  showEditViewButtonsOnHover: false,
-  showViewButtonsOnHover: false
-};
+export default EasyEdit;
