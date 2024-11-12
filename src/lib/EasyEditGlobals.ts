@@ -1,4 +1,4 @@
-const EasyEditGlobals = {
+export const EasyEditGlobals = {
   DEFAULT_PLACEHOLDER: 'Click to edit',
   DEFAULT_SELECT_PLACEHOLDER: 'Select ...',
   DEFAULT_SAVE_BUTTON_LABEL: 'Save',
@@ -11,6 +11,5 @@ const EasyEditGlobals = {
   FAILED_VALIDATION_MESSAGE: 'Please provide a valid value',
   POSITION_AFTER: 'after',
   POSITION_BEFORE: 'before'
-};
-
-export default Object.freeze(EasyEditGlobals);
+} as const;
+export type ValueType = string | number | boolean;

@@ -3,7 +3,7 @@ import {ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import "./EasyEdit.css";
 
 // local modules
-import EasyEditGlobals from './EasyEditGlobals';
+import { EasyEditGlobals, ValueType } from './EasyEditGlobals';
 import EasyDropdown from "./EasyDropdown";
 import EasyInput from "./EasyInput";
 import EasyParagraph from "./EasyParagraph";
@@ -36,31 +36,30 @@ export const Types = {
 } as const;
 type InputType = typeof Types[keyof typeof Types];
 
-const useHover = () => {
+const useHover = ():[boolean, () => void, () => void] => {
   const [hover, setHover] = useState(false);
-
   const handleHoverOn = () => setHover(true);
   const handleHoverOff = () => setHover(false);
-
   return [hover, handleHoverOn, handleHoverOff];
 };
-interface UseEditStateProps<T> {
-  initialValue: T;
+
+interface UseEditStateProps {
+  initialValue: ValueType;
   editMode?: boolean;
-  onSave: (value: T)=>void;
-  onCancel: ()=>void;
-  onValidate: (value: T)=>boolean;
+  onSave: (value: ValueType) => void;
+  onCancel: () => void;
+  onValidate: (value: ValueType) => boolean;
 }
-const useEditState = <T, >({
+const useEditState = ({
   initialValue,
   editMode = false,
   onSave,
   onCancel,
   onValidate
-}: UseEditStateProps<T>) => {
+}: UseEditStateProps) => {
   const [editing, setEditing] = useState(editMode || false);
-  const [value, setValue] = useState<T>(initialValue);
-  const [tempValue, setTempValue] = useState<T>(initialValue);
+  const [value, setValue] = useState<ValueType>(initialValue);
+  const [tempValue, setTempValue] = useState<ValueType>(initialValue);
   const [isValid, setIsValid] = useState(true);
   const [isHidden, setIsHidden] = useState(false);
 
@@ -113,7 +112,7 @@ const isNullOrUndefinedOrEmpty = (value: any) => {
 
 interface EasyEditProps {
   type: InputType;
-  value: string | number | boolean;
+  value: ValueType; 
   options?: any[];
   saveButtonLabel?: string;
   saveButtonStyle?: string;
@@ -127,10 +126,10 @@ interface EasyEditProps {
   placeholder?: string;
   onCancel: () => void;
   onDelete?: () => void;
-  onValidate: (value: string | number | boolean) => boolean;
-  onFocus?: () => void;
-  onBlur?: () => void;
-  onSave: (value: string | number | boolean) => void;
+  onValidate: (value: ValueType) => boolean;
+  onFocus?: (value: ValueType) => void;
+  onBlur?: (value: ValueType) => void;
+  onSave: (value: ValueType) => void;
   validationMessage?: string;
   editable?: boolean;
   inputAttributes?: Record<string, any>;
@@ -158,26 +157,26 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
   value,
   options = [],
   saveButtonLabel = EasyEditGlobals.DEFAULT_SAVE_BUTTON_LABEL,
-  saveButtonStyle =  null,
+  saveButtonStyle =  undefined,
   cancelButtonLabel =  EasyEditGlobals.DEFAULT_CANCEL_BUTTON_LABEL,
-  cancelButtonStyle = null,
+  cancelButtonStyle = undefined,
   deleteButtonLabel = EasyEditGlobals.DEFAULT_DELETE_BUTTON_LABEL,
-  deleteButtonStyle =  null,
+  deleteButtonStyle =  undefined,
   editButtonLabel =  EasyEditGlobals.DEFAULT_EDIT_BUTTON_LABEL,
-  editButtonStyle =  null,
+  editButtonStyle =  undefined,
   buttonsPosition =  EasyEditGlobals.POSITION_AFTER,
   placeholder = EasyEditGlobals.DEFAULT_PLACEHOLDER,
   onCancel = () => {},
   onDelete =  () => {},
-  onBlur =  () => {},
-  onValidate =  (value: string | number | boolean) => true,
+  onBlur =  (value: ValueType) => {},
+  onValidate =  (value: ValueType) => true,
   validationMessage =  EasyEditGlobals.FAILED_VALIDATION_MESSAGE,
-  onFocus = () => {},
-  onSave =  () => {},
+  onFocus = (value: ValueType) => {},
+  onSave =  (value: ValueType) => {},
   editable =  true,
   inputAttributes = {},
   viewAttributes = {},
-  instructions = {},
+  instructions = null,
   editComponent = {},
   displayComponent = false,
   disableAutoSubmit = false ,
@@ -206,19 +205,20 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
     handleSave,
     handleCancel,
     setEditing
-  } = useEditState(value, isEditing, onSave, onCancel, onValidate);
-  const saveButton = useRef();
-  const editButton = useRef();
-  const cancelButton = useRef();
-  const deleteButton = useRef();
+  } = useEditState({value, isEditing, onSave, onCancel, onValidate});
 
-  const handleKeyDown = (e) => {
-    if (!disableAutoCancel && e.keyCode === 27) {
+  const saveButton : React.RefObject<HTMLButtonElement> = useRef<HTMLButtonElement>(null);
+  const editButton: React.RefObject<HTMLButtonElement> = useRef<HTMLButtonElement>(null);
+  const cancelButton: React.RefObject<HTMLButtonElement> = useRef<HTMLButtonElement>(null);
+  const deleteButton: React.RefObject<HTMLButtonElement> = useRef<HTMLButtonElement>(null);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!disableAutoCancel && e.key === "Enter") {
       handleCancel();
     }
 
     if (!disableAutoSubmit) {
-      if ((e.keyCode === 13 && type !== Types.TEXTAREA) || (e.keyCode === 13
+      if ((e.key === "Enter" && type !== Types.TEXTAREA) || (e.key === "Enter"
         && e.ctrlKey && type === Types.TEXTAREA)) {
         handleSave();
       }
@@ -258,21 +258,36 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
     setEditing(true);
   };
 
-  const handleChange = (e) => {
-    setTempValue(e.target ? e.target.value : e);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    if (e.target) {
+      setTempValue(e.target.value);
+    }
   };
 
-  const handleCheckboxChange = (e) => {
+  interface Option {
+    value: string;
+  }
+  
+  const handleCheckboxChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    tempValue: string[] | undefined
+    // options: Option[],
+    // setTempValue: (value: string[]) => void
+  ) => {
     let values = tempValue || [];
+  
     if (e.target.checked && !values.includes(e.target.value)) {
       values.push(e.target.value);
     } else {
       values.splice(values.indexOf(e.target.value), 1);
     }
+  
     let optionValues = options.map((o) => o.value);
     values = values.filter((value) => optionValues.includes(value));
+  
     setTempValue(values);
   };
+
 
   const handleClick = () => {
     if (editable) {
@@ -385,7 +400,14 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
     }
   };
 
-  const generateButton = (ref, onClick, label, cssClass, name, saveOnBlur) => {
+  const generateButton = (
+    ref: React.Ref<HTMLButtonElement>, 
+    onClick: React.MouseEventHandler<HTMLButtonElement>, 
+    label: string, 
+    cssClass: string, 
+    name: string, 
+    saveOnBlur: boolean = false
+  ) => {
     if (saveOnBlur) {
       return "";
     }
@@ -397,10 +419,11 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
   };
 
   const generateEditButton = (
-    cssClassPrefix:string, 
-    hideEditButton:boolean, 
-    editButtonLabel,
-    editButtonStyle) => {
+    cssClassPrefix: string, 
+    hideEditButton: boolean, 
+    editButtonLabel: string,
+    editButtonStyle?: string
+    ) => {
     if (!showViewButtonsOnHover || (showViewButtonsOnHover && hover)) {
       return (
         !hideEditButton && (
@@ -438,7 +461,7 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
     }
   };
 
-  const renderInput = (inputValue) => {
+  const renderInput = (inputValue: ValueType) => {
     return (
       <EasyInput
         value={inputValue}

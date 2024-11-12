@@ -3,7 +3,7 @@ import EasyEditGlobals from './EasyEditGlobals';
 import './EasyEdit.css';
 
 interface EasyInputProps {
-  type: string;
+  type: ValueType;
   value: string;
   placeholder?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -11,8 +11,8 @@ interface EasyInputProps {
   onBlur?: () => void;
   attributes?: Record<string, any>;
   cssClassPrefix?: string;
-  onMouseLeave?: () => void;
   onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 };
 const EasyInput:React.FC<EasyInputProps> = ({
   type,
