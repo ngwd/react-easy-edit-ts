@@ -1,12 +1,13 @@
 import React, { useState, useEffect, ReactElement } from 'react';
+import { ValueType } from './EasyEditGlobals';
+// type ValueType = string | number | [] | Record<string, any>;
 
-type ValueType = string | number | [] | Record<string, any>;
 interface EasyCustomProps {
   children?: ReactElement;
   cssClassPrefix?: string;
   onBlur?: () => void;
   onFocus?: () => void;
-  onSetValue?: (value: ValueType) => void;
+  onSetValue?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   value?: ValueType;
 };
 const EasyCustom:React.FC<EasyCustomProps> = ({
@@ -24,13 +25,13 @@ const EasyCustom:React.FC<EasyCustomProps> = ({
 
   const handleSetValue = (newValue: ValueType) => {
     setValue(newValue);
-    if (onSetValue !== undefined) {
+    if (onSetValue) {
       onSetValue(newValue);
     }
   };
 
   const handleBlur = () => {
-    if (onBlur !== undefined) {
+    if (onBlur) {
       // onBlur(value);
       onBlur();
     }
@@ -42,19 +43,25 @@ const EasyCustom:React.FC<EasyCustomProps> = ({
     }
   };
 
-  const child = React.cloneElement(
-    React.Children.only(children),
-    {
-      setParentValue: handleSetValue,
-      onBlur: handleBlur,
-      onFocus: handleFocus,
-      value
+  const getChild = () => {
+    if (React.isValidElement(children)) {
+      const child = React.cloneElement(
+        React.Children.only(children),
+        {
+          setParentValue: handleSetValue,
+          onBlur: handleBlur,
+          onFocus: handleFocus,
+          value
+        }
+      );
+      return child;
     }
-  );
+    return null;
+  }
 
   return (
     <div className={cssClassPrefix + "easy-edit-component-wrapper"}>
-      {child}
+      {getChild()}
     </div>
   );
 };

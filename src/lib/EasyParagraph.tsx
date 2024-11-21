@@ -1,9 +1,9 @@
 import React, { ReactElement }from 'react';
 import './EasyEdit.css';
-import EasyEditGlobals from './EasyEditGlobals';
+import { EasyEditGlobals } from './EasyEditGlobals';
 
 interface EasyParagraphProps {
-  value?: string|number;
+  value?: string;
   placeholder?: string | ReactElement;
   onChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   attributes?: Record<string, any>;

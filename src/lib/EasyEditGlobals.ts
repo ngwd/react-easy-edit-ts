@@ -12,4 +12,7 @@ export const EasyEditGlobals = {
   POSITION_AFTER: 'after',
   POSITION_BEFORE: 'before'
 } as const;
-export type ValueType = string | number | boolean;
+// export type ValueType = string | number | boolean;
+export type ValueType = string | number | [] | Record<string, any>;
+// export type InputValueType = Extract<ValueType, string | number>;
+export type InputValueType = string | number;

@@ -1,21 +1,24 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import './App.css';
-import EasyEdit, {Types} from "../lib/EasyEdit";
+import {EasyEdit, Types} from "../lib/EasyEdit";
+import { ValueType } from '../lib/EasyEditGlobals';
 
 import CustomInput from './CustomInput';
 import CustomDisplay from './CustomDisplay';
 
-class App extends Component {
+interface AppState {
+  editMode: boolean;
+}
+class App extends Component<{}, AppState> {
 
-  constructor(props) {
+  constructor(props: any) {
     super(props);
     this.state = {
       editMode: false
     };
   }
 
-
-  static onTest(value) {
+  static onTest(value: ValueType) {
     alert('save value : ' + value);
   }
 
@@ -25,7 +28,7 @@ class App extends Component {
       {label: 'Test Two', value: 'testtwo'},
       {label: 'Test Three', value: 'testthree'},
       {label: 'Test Four', value: 'testfour'}
-    ]
+    ];
   }
 
   static generateValues() {
@@ -206,6 +209,7 @@ class App extends Component {
                   onSave={App.onTest}
               />
               <h4>type "number"</h4>
+
               <EasyEdit
                   type="number"
                   value={1}

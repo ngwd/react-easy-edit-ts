@@ -1,9 +1,11 @@
 import React from 'react';
+import { InputValueType } from './EasyEditGlobals'
 import './EasyEdit.css';
+
 
 interface EasyDatalistProps {
   options?: any[]; 
-  value?: string|number;
+  value?: InputValueType;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   attributes?: Record<string, any>;
   placeholder?: string;
@@ -23,7 +25,7 @@ const EasyDatalist:React.FC<EasyDatalistProps> = ({
 }) => {
   const datalistId = 'easy-datalist-id';
 
-  let datalistOptions = options.map(dl => (
+  let datalistOptions = options?.map(dl => (
     <option key={dl.value} value={dl.value} />
   ));
 
@@ -46,5 +48,4 @@ const EasyDatalist:React.FC<EasyDatalistProps> = ({
     </div>
   );
 };
-
 export default EasyDatalist;

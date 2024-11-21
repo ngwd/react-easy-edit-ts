@@ -3,7 +3,7 @@ import {ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import "./EasyEdit.css";
 
 // local modules
-import { EasyEditGlobals, ValueType } from './EasyEditGlobals';
+import { EasyEditGlobals, InputValueType, ValueType } from './EasyEditGlobals';
 import EasyDropdown from "./EasyDropdown";
 import EasyInput from "./EasyInput";
 import EasyParagraph from "./EasyParagraph";
@@ -34,7 +34,7 @@ export const Types = {
   URL: "url",
   WEEK: "week"
 } as const;
-type InputType = typeof Types[keyof typeof Types];
+export type InputType = typeof Types[keyof typeof Types];
 
 const useHover = ():[boolean, () => void, () => void] => {
   const [hover, setHover] = useState(false);
@@ -112,7 +112,7 @@ const isNullOrUndefinedOrEmpty = (value: any) => {
 
 interface EasyEditProps {
   type: InputType;
-  value: ValueType; 
+  value?: ValueType; 
   options?: any[];
   saveButtonLabel?: string;
   saveButtonStyle?: string;
@@ -124,9 +124,9 @@ interface EasyEditProps {
   editButtonStyle?: string;
   buttonsPosition?: string;
   placeholder?: string;
-  onCancel: () => void;
+  onCancel?: () => void;
   onDelete?: () => void;
-  onValidate: (value: ValueType) => boolean;
+  onValidate?: (value: ValueType) => boolean;
   onFocus?: (value: ValueType) => void;
   onBlur?: (value: ValueType) => void;
   onSave: (value: ValueType) => void;
@@ -150,6 +150,8 @@ interface EasyEditProps {
   isEditing?: boolean;
   showEditViewButtonsOnHover?: boolean;
   showViewButtonsOnHover?: boolean;
+  name?: string; // for customization
+  min?: number;  // for number input
 };
 
 export const EasyEdit: React.FC<EasyEditProps> = ({
@@ -157,23 +159,23 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
   value,
   options = [],
   saveButtonLabel = EasyEditGlobals.DEFAULT_SAVE_BUTTON_LABEL,
-  saveButtonStyle =  undefined,
-  cancelButtonLabel =  EasyEditGlobals.DEFAULT_CANCEL_BUTTON_LABEL,
-  cancelButtonStyle = undefined,
+  saveButtonStyle = "",
+  cancelButtonLabel = EasyEditGlobals.DEFAULT_CANCEL_BUTTON_LABEL,
+  cancelButtonStyle = "",
   deleteButtonLabel = EasyEditGlobals.DEFAULT_DELETE_BUTTON_LABEL,
-  deleteButtonStyle =  undefined,
-  editButtonLabel =  EasyEditGlobals.DEFAULT_EDIT_BUTTON_LABEL,
-  editButtonStyle =  undefined,
-  buttonsPosition =  EasyEditGlobals.POSITION_AFTER,
+  deleteButtonStyle = "",
+  editButtonLabel = EasyEditGlobals.DEFAULT_EDIT_BUTTON_LABEL,
+  editButtonStyle = "",
+  buttonsPosition = EasyEditGlobals.POSITION_AFTER,
   placeholder = EasyEditGlobals.DEFAULT_PLACEHOLDER,
   onCancel = () => {},
-  onDelete =  () => {},
-  onBlur =  (value: ValueType) => {},
-  onValidate =  (value: ValueType) => true,
-  validationMessage =  EasyEditGlobals.FAILED_VALIDATION_MESSAGE,
+  onDelete = () => {},
+  onBlur = (value: ValueType) => {},
+  onValidate = (value: ValueType) => true,
+  validationMessage = EasyEditGlobals.FAILED_VALIDATION_MESSAGE,
   onFocus = (value: ValueType) => {},
-  onSave =  (value: ValueType) => {},
-  editable =  true,
+  onSave = (value: ValueType) => {},
+  editable = true,
   inputAttributes = {},
   viewAttributes = {},
   instructions = null,
@@ -205,7 +207,8 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
     handleSave,
     handleCancel,
     setEditing
-  } = useEditState({value, isEditing, onSave, onCancel, onValidate});
+  } = useEditState({initialValue: value as ValueType, editMode: isEditing, onSave, onCancel, onValidate});
+
 
   const saveButton : React.RefObject<HTMLButtonElement> = useRef<HTMLButtonElement>(null);
   const editButton: React.RefObject<HTMLButtonElement> = useRef<HTMLButtonElement>(null);
@@ -218,8 +221,8 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
     }
 
     if (!disableAutoSubmit) {
-      if ((e.key === "Enter" && type !== Types.TEXTAREA) || (e.key === "Enter"
-        && e.ctrlKey && type === Types.TEXTAREA)) {
+      if ((e.key === "Enter" && type !== Types.TEXTAREA) || 
+          (e.key === "Enter" && e.ctrlKey && type === Types.TEXTAREA)) {
         handleSave();
       }
     }
@@ -314,11 +317,11 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
 
     switch (type) {
       case Types.CHECKBOX:
-        return renderCheckbox(inputValue);
+        return renderCheckbox(inputValue as InputValueType);
       case Types.COLOR:
-        return renderColor(inputValue);
+        return renderColor(inputValue as string);
       case Types.DATALIST:
-        return renderDatalist(inputValue);
+        return renderDatalist(inputValue as InputValueType);
       case Types.DATE:
       case Types.DATETIME_LOCAL:
       case Types.EMAIL:
@@ -362,9 +365,8 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
     }
   };
 
-  const manageButtonStyle = (style?:string) => {
-    return style === null ? cssClassPrefix + EasyEditGlobals.DEFAULT_BUTTON_CSS_CLASS
-      : style;
+  const manageButtonStyle = (style:string) => {
+    return style === ""? cssClassPrefix + EasyEditGlobals.DEFAULT_BUTTON_CSS_CLASS : style;
   };
 
   const renderValidationMessage = () => {
@@ -401,7 +403,7 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
   };
 
   const generateButton = (
-    ref: React.Ref<HTMLButtonElement>, 
+    ref: React.RefObject<HTMLButtonElement>, 
     onClick: React.MouseEventHandler<HTMLButtonElement>, 
     label: string, 
     cssClass: string, 
@@ -422,7 +424,7 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
     cssClassPrefix: string, 
     hideEditButton: boolean, 
     editButtonLabel: string,
-    editButtonStyle?: string
+    editButtonStyle: string
     ) => {
     if (!showViewButtonsOnHover || (showViewButtonsOnHover && hover)) {
       return (
@@ -478,10 +480,10 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
     );
   };
 
-  const renderTextarea = (inputValue) => {
+  const renderTextarea = (inputValue: ValueType) => {
     return (
       <EasyParagraph
-        value={inputValue}
+        value={inputValue as string}
         placeholder={placeholder}
         onChange={handleChange}
         onFocus={handleFocus}
@@ -492,14 +494,14 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
     );
   };
 
-  const renderSelect = (inputValue) => {
+  const renderSelect = (inputValue: ValueType) => {
     return (
       <EasyDropdown
-        value={inputValue}
+        value={inputValue as InputValueType}
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        options={options}
+        options={options as InputValueType[]}
         placeholder={placeholder === EasyEditGlobals.DEFAULT_PLACEHOLDER
           ? EasyEditGlobals.DEFAULT_SELECT_PLACEHOLDER : placeholder}
         attributes={inputAttributes}
@@ -508,7 +510,7 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
     );
   };
 
-  const renderRadio = (inputValue) => {
+  const renderRadio = (inputValue: string) => {
     return (
       <EasyRadio
         value={inputValue}
@@ -522,24 +524,24 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
     );
   };
 
-  const renderCheckbox = (inputValue) => {
+  const renderCheckbox = (inputValue: InputValueType) => {
     return (
       <EasyCheckbox
+        options={options}
         value={inputValue}
         onChange={handleCheckboxChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        options={options}
         attributes={inputAttributes}
         cssClassPrefix={cssClassPrefix}
       />
     );
   };
 
-  const renderDatalist = (inputValue) => {
+  const renderDatalist = (inputValue: ValueType) => {
     return (
       <EasyDatalist
-        value={inputValue}
+        value={inputValue as InputValueType}
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
@@ -550,7 +552,7 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
     );
   };
 
-  const renderColor = (inputValue) => {
+  const renderColor = (inputValue: string) => {
     return (
       <EasyColor
         value={inputValue}
@@ -578,8 +580,7 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
           {!isNullOrUndefinedOrEmpty(currentValue)
             ? React.cloneElement(displayComponent, { value: currentValue })
             : placeholder}
-          {generateEditButton(cssClassPrefix, hideEditButton, editButtonLabel,
-            editButtonStyle)}
+          {generateEditButton(cssClassPrefix, hideEditButton, editButtonLabel, editButtonStyle)}
         </div>
       );
     }
@@ -638,7 +639,7 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
           <input
             {...viewAttributes}
             type={type}
-            value={currentValue}
+            value={currentValue as string}
             onClick={handleClick}
             readOnly
           />
@@ -672,4 +673,4 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
   }
   return renderPlaceholder();
 };
-export default EasyEdit;
+//export default EasyEdit;

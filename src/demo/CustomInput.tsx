@@ -2,8 +2,8 @@ import React, { Component, ChangeEvent } from 'react';
 
 interface CustomInputProps {
   value?: string;
-  setParentValue: (value: string) => void;
-  onBlur: () => void;
+  setParentValue?: (value: string) => void;
+  onBlur?: () => void;
 }
 
 interface CustomInputState {
@@ -22,14 +22,18 @@ export default class CustomInput extends Component<CustomInputProps, CustomInput
 
   onChange(e: ChangeEvent<HTMLInputElement>) {
     const newValue = e.target.value.toUpperCase();
-    this.props.setParentValue(newValue);
+    if (this.props.setParentValue) {
+      this.props.setParentValue(newValue);
+    }
     this.setState({
       value: newValue
     });
   }
 
   onBlur() {
-    this.props.onBlur();
+    if (this.props.onBlur) {
+      this.props.onBlur();
+    }
   }
 
   render() {

@@ -1,10 +1,11 @@
 import React from 'react';
-import EasyEditGlobals from './EasyEditGlobals';
+import { EasyEditGlobals, ValueType }  from './EasyEditGlobals';
+import { InputType } from './EasyEdit'
 import './EasyEdit.css';
 
 interface EasyInputProps {
-  type: ValueType;
-  value: string;
+  type: InputType;
+  value: ValueType;
   placeholder?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onFocus?: () => void;
@@ -33,7 +34,7 @@ const EasyInput:React.FC<EasyInputProps> = ({
         <input
             autoFocus={attributes.autoFocus || true}
             type={type}
-            value={value || ""}
+            value={value as string}
             onChange={onChange}
             onFocus={onFocus}
             onBlur={onBlur}

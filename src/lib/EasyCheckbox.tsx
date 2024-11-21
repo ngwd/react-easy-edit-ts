@@ -1,9 +1,10 @@
 import React from 'react';
 import './EasyEdit.css';
+import { ValueType } from './EasyEditGlobals'
 
 interface EasyCheckboxProps {
   options: any[]; 
-  value?: string[];
+  value?: ValueType;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   attributes?: Record<string, any>;
   cssClassPrefix?: string;
@@ -12,7 +13,7 @@ interface EasyCheckboxProps {
 };
 const EasyCheckbox:React.FC<EasyCheckboxProps> =  ({
   options, 
-  value, 
+  value,
   onChange, 
   attributes = {}, 
   cssClassPrefix, 
@@ -29,7 +30,7 @@ const EasyCheckbox:React.FC<EasyCheckboxProps> =  ({
           onChange={onChange}
           onFocus={onFocus}
           onBlur={onBlur}
-          checked={value.includes(option.value)}
+          checked={value?.includes(option.value)}
       />{option.label}
     </label>
   ));
