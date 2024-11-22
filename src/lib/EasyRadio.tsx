@@ -1,9 +1,10 @@
-import React, { ReactElement } from 'react';
+import React from 'react';
 import './EasyEdit.css';
+import { InputValueType, OptionType } from './EasyEditGlobals'
 
 interface EasyRadioProps {
-  options: any[]; 
-  value?: string|number;
+  options: OptionType[]; 
+  value?: InputValueType;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   attributes?: Record<string, any>;
   cssClassPrefix?: string;

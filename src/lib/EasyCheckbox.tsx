@@ -1,10 +1,10 @@
 import React from 'react';
 import './EasyEdit.css';
-import { ValueType } from './EasyEditGlobals'
+import { ValueType, OptionType } from './EasyEditGlobals'
 
 interface EasyCheckboxProps {
-  options: any[]; 
-  value?: ValueType;
+  options: OptionType[]; 
+  value?: ValueType[];
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   attributes?: Record<string, any>;
   cssClassPrefix?: string;
@@ -40,5 +40,4 @@ const EasyCheckbox:React.FC<EasyCheckboxProps> =  ({
     </div>
   );
 };
-
 export default EasyCheckbox;

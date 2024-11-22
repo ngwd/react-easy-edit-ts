@@ -16,3 +16,8 @@ export const EasyEditGlobals = {
 export type ValueType = string | number | [] | Record<string, any>;
 // export type InputValueType = Extract<ValueType, string | number>;
 export type InputValueType = string | number;
+
+export interface OptionType {
+  label: string;
+  value: string;
+};

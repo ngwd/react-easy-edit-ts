@@ -1,9 +1,9 @@
 import * as React from 'react';
-import {ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import {ReactNode, useCallback, useEffect, useRef, useState, ReactElement } from "react";
 import "./EasyEdit.css";
 
 // local modules
-import { EasyEditGlobals, InputValueType, ValueType } from './EasyEditGlobals';
+import { EasyEditGlobals, InputValueType, ValueType, OptionType } from './EasyEditGlobals';
 import EasyDropdown from "./EasyDropdown";
 import EasyInput from "./EasyInput";
 import EasyParagraph from "./EasyParagraph";
@@ -113,7 +113,7 @@ const isNullOrUndefinedOrEmpty = (value: any) => {
 interface EasyEditProps {
   type: InputType;
   value?: ValueType; 
-  options?: any[];
+  options?: OptionType[];
   saveButtonLabel?: string;
   saveButtonStyle?: string;
   cancelButtonLabel?: string;
@@ -135,7 +135,13 @@ interface EasyEditProps {
   inputAttributes?: Record<string, any>;
   viewAttributes?: Record<string, any>;
   instructions?: ReactNode;
-  editComponent?: ReactNode;
+  editComponent?: ReactElement<{
+    setParentValue: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void; 
+    onBlur: () => void;
+    onFocus: () => void;
+    value: string | number;
+  }>;
+  // editComponent?: ReactNode;
   displayComponent?: ReactNode;
   disableAutoSubmit?: boolean,
   disableAutoCancel?: boolean,
@@ -151,6 +157,7 @@ interface EasyEditProps {
   showEditViewButtonsOnHover?: boolean;
   showViewButtonsOnHover?: boolean;
   name?: string; // for customization
+  setParentValue?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   min?: number;  // for number input
 };
 
@@ -262,15 +269,20 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    if (e.target) {
-      setTempValue(e.target.value);
+    let newValue: ValueType;
+  
+    if (!e.target) return;
+    // Since `value` could be string, number, or other types, handle the cases
+    if (e.target.type === "number") {
+      newValue = Number(e.target.value); // Parse value as number if it's a number input
+    } else {
+      newValue = e.target.value; // Otherwise treat it as string
     }
+  
+    setTempValue(newValue); // Update the state with new value
   };
 
-  interface Option {
-    value: string;
-  }
-  
+
   const handleCheckboxChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     tempValue: string[] | undefined
@@ -447,11 +459,11 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
 
     let selected;
     if (Types.CHECKBOX === type) {
-      selected = options.filter((option) => {
+      selected = options.filter((option: OptionType) => {
         return currentValue.includes(option.value);
       });
     } else {
-      selected = options.filter((option) => {
+      selected = options.filter((option: OptionType) => {
         return currentValue === option.value;
       });
     }
@@ -501,7 +513,7 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        options={options as InputValueType[]}
+        options={options}
         placeholder={placeholder === EasyEditGlobals.DEFAULT_PLACEHOLDER
           ? EasyEditGlobals.DEFAULT_SELECT_PLACEHOLDER : placeholder}
         attributes={inputAttributes}
@@ -510,10 +522,10 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
     );
   };
 
-  const renderRadio = (inputValue: string) => {
+  const renderRadio = (inputValue: ValueType) => {
     return (
       <EasyRadio
-        value={inputValue}
+        value={inputValue as string}
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
@@ -528,7 +540,7 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
     return (
       <EasyCheckbox
         options={options}
-        value={inputValue}
+        value={inputValue as []}
         onChange={handleCheckboxChange}
         onFocus={handleFocus}
         onBlur={handleBlur}

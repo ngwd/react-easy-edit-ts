@@ -1,9 +1,14 @@
 import React, { useState, useEffect, ReactElement } from 'react';
 import { ValueType } from './EasyEditGlobals';
-// type ValueType = string | number | [] | Record<string, any>;
 
 interface EasyCustomProps {
-  children?: ReactElement;
+  // children?: ReactElement;
+  children?: ReactElement<{
+    setParentValue: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void; 
+    onBlur: () => void;
+    onFocus: () => void;
+    value: ValueType;
+  }>;
   cssClassPrefix?: string;
   onBlur?: () => void;
   onFocus?: () => void;
@@ -23,16 +28,17 @@ const EasyCustom:React.FC<EasyCustomProps> = ({
     setValue(initialValue as ValueType);
   }, [initialValue]);
 
-  const handleSetValue = (newValue: ValueType) => {
+  const handleSetValue = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const newValue = e.target.value;
     setValue(newValue);
+
     if (onSetValue) {
-      onSetValue(newValue);
+      onSetValue(e);  // Pass the ChangeEvent to the parent handler
     }
   };
 
   const handleBlur = () => {
     if (onBlur) {
-      // onBlur(value);
       onBlur();
     }
   };
@@ -51,7 +57,7 @@ const EasyCustom:React.FC<EasyCustomProps> = ({
           setParentValue: handleSetValue,
           onBlur: handleBlur,
           onFocus: handleFocus,
-          value
+          value: value
         }
       );
       return child;

@@ -1,9 +1,9 @@
 import React, { ReactElement } from 'react';
 import './EasyEdit.css';
-import { EasyEditGlobals, InputValueType } from './EasyEditGlobals';
+import { EasyEditGlobals, InputValueType, OptionType } from './EasyEditGlobals';
 
 interface EasyDropdownProps {
-  options: InputValueType[]; 
+  options: OptionType[]; 
   value?: InputValueType;
   onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   placeholder?: string | ReactElement;
