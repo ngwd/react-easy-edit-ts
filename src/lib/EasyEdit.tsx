@@ -283,23 +283,15 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
   };
 
 
-  const handleCheckboxChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    tempValue: string[] | undefined
-    // options: Option[],
-    // setTempValue: (value: string[]) => void
-  ) => {
-    let values = tempValue || [];
-  
-    if (e.target.checked && !values.includes(e.target.value)) {
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let values: ValueType[] = Array.isArray(tempValue) ? [...tempValue] : []; 
+    if (e.target.checked  && !values.includes(e.target.value)) {
       values.push(e.target.value);
     } else {
-      values.splice(values.indexOf(e.target.value), 1);
+    values.splice(values.indexOf(e.target.value), 1);
     }
-  
     let optionValues = options.map((o) => o.value);
-    values = values.filter((value) => optionValues.includes(value));
-  
+    values = values.filter((value) => optionValues.includes(value as string));
     setTempValue(values);
   };
 
@@ -451,7 +443,6 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
   };
 
   const renderComplexView = () => {
-    const { placeholder, options, type } = props;
 
     if (isNullOrUndefinedOrEmpty(currentValue)) {
       return placeholder;
@@ -459,16 +450,21 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
 
     let selected;
     if (Types.CHECKBOX === type) {
-      selected = options.filter((option: OptionType) => {
-        return currentValue.includes(option.value);
-      });
+      if (Array.isArray(currentValue)) {
+        selected = options.filter((option: OptionType) => {
+          return currentValue.includes(option.value as never);
+        });
+      } else {
+        console.error("currentValue execpted to be array, however, got", currentValue);
+        return placeholder;
+      }
     } else {
       selected = options.filter((option: OptionType) => {
         return currentValue === option.value;
       });
     }
 
-    if (selected.length !== 0) {
+    if (selected && selected.length !== 0) {
       return selected.map(checkbox => checkbox.label).join(", ");
     } else {
       return currentValue;
@@ -540,7 +536,7 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
     return (
       <EasyCheckbox
         options={options}
-        value={inputValue as []}
+        value={inputValue}
         onChange={handleCheckboxChange}
         onFocus={handleFocus}
         onBlur={handleBlur}

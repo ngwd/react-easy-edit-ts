@@ -11,13 +11,13 @@ interface EasyCheckboxProps {
   onFocus?: () => void;
   onBlur?: () => void;
 };
-const EasyCheckbox:React.FC<EasyCheckboxProps> =  ({
-  options, 
+const EasyCheckbox:React.FC<EasyCheckboxProps> = ({
+  options,
   value,
-  onChange, 
-  attributes = {}, 
-  cssClassPrefix, 
-  onFocus, 
+  onChange,
+  attributes = {},
+  cssClassPrefix,
+  onFocus,
   onBlur
 }) => {
   let checkboxes = options.map(option => (
