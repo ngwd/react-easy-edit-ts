@@ -443,7 +443,6 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
   };
 
   const renderComplexView = () => {
-
     if (isNullOrUndefinedOrEmpty(currentValue)) {
       return placeholder;
     }
@@ -466,9 +465,11 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
 
     if (selected && selected.length !== 0) {
       return selected.map(checkbox => checkbox.label).join(", ");
-    } else {
-      return currentValue;
+    } 
+    if (typeof currentValue === 'object') {
+      return JSON.stringify(currentValue);
     }
+    return String(currentValue);
   };
 
   const renderInput = (inputValue: ValueType) => {
@@ -532,11 +533,11 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
     );
   };
 
-  const renderCheckbox = (inputValue: InputValueType) => {
+  const renderCheckbox = (inputValue: ValueType) => {
     return (
       <EasyCheckbox
         options={options}
-        value={inputValue}
+        value={inputValue as InputValueType}
         onChange={handleCheckboxChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
@@ -576,7 +577,7 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
   const renderPlaceholder = () => {
     const cssWrapperClass = cssClassPrefix + "easy-edit-wrapper";
 
-    if (React.isValidElement(displayComponent)) {
+    if (React.isValidElement<{ value?: any }>(displayComponent)) {
       return (
         <div
           {...viewAttributes}
@@ -618,10 +619,8 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
             onMouseEnter={handleHoverOn}
             onMouseLeave={handleHoverOff}
           >
-            {!isNullOrUndefinedOrEmpty(currentValue) ? passwordValue
-              : placeholder}
-            {generateEditButton(cssClassPrefix, hideEditButton, editButtonLabel,
-              editButtonStyle)}
+            {!isNullOrUndefinedOrEmpty(currentValue) ? passwordValue as string : placeholder}
+            {generateEditButton(cssClassPrefix, hideEditButton, editButtonLabel, editButtonStyle)}
           </div>
         );
       }
@@ -637,8 +636,7 @@ export const EasyEdit: React.FC<EasyEditProps> = ({
             onMouseLeave={handleHoverOff}
           >
             {renderComplexView()}
-            {generateEditButton(cssClassPrefix, hideEditButton, editButtonLabel,
-              editButtonStyle)}
+            {generateEditButton(cssClassPrefix, hideEditButton, editButtonLabel, editButtonStyle)}
           </div>
         );
       }
